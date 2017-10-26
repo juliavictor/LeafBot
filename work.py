@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 result = 0
 
 # Read image
-sourceImage = cv2.imread("img/ginkgo.jpg", cv2.IMREAD_GRAYSCALE);
+sourceImage = cv2.imread("img/4.jpg", cv2.IMREAD_GRAYSCALE);
 
 # Resize if necessary
 TARGET_PIXEL_AREA = 300000.0
@@ -205,21 +205,15 @@ if result == 0:
     _, contours, _ = cv2.findContours(edgedImage, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     cnt = contours[0]
     
-    class myarray(np.ndarray):
-        def __new__(cls, *args, **kwargs):
-            return np.array(*args, **kwargs).view(myarray)
-        def index(self, value):
-            return np.where(self==value)
-    
     # Вектор расстояний dist от центра масс до границ
     N = len(cnt)
     dist = [] 
     for i in range(N): 
-        p = cnt[i]
-        x2 = p.item(0)
-        y2 = p.item(1)
-        distance = ((x2 - x1)**2 + (y2 - y1)**2)**(.5)
-        dist.append(distance)
+    	p = cnt[i]
+    	x2 = p.item(0)
+    	y2 = p.item(1)
+    	distance = ((x2 - x1)**2 + (y2 - y1)**2)**(.5)
+    	dist.append(distance)
         
     # Поиск основания
     start = 0
