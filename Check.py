@@ -11,20 +11,17 @@ imNum = 0
 head = ['Type', 'Eccentricity', 'Circularity', 'Solidity', 'Extent', 'EquivDiameter', 'Convex hull']
 propNum = len(head)
 images = []
-for i in glob2.glob("leaves/*.jpg"):
+for i in glob2.glob("leaves/*.*"):
     img = cv2.imread(i, cv2.IMREAD_GRAYSCALE)
     images.append(img)
 
-imNum = len(images)
-imgMatrix = [[0 for x in range(propNum)] for y in range(imNum+1)]
-imgMatrix[0] = head
-
-for i in range(1,imNum+1):
-    imgMatrix[i][0] = 'treeType'
+toWrite = []
 
 if images != []:
     for sourceImage in images:
+        #matrixLine = np.zeros(propNum)
         matrixLine = []
+        #print matrixLine
         result = 0
 
         # Resize if necessary
@@ -78,8 +75,8 @@ if images != []:
         #Проверка контуров по размеру
         if len(contours) == 0:
             result=1
-            print 'Ошибка. Слишком мелкий объект для анализа, сфотографируйте лист крупнее, пожалуйста.'
-            cv2.imshow('Image', img)
+            print 'Error 1'
+            #cv2.imshow('Image', img)
     
         else:
             #Tophat
@@ -94,8 +91,8 @@ if images != []:
     
             if len(contours) == 0:
                 result=2
-                print 'Ошибка. Сфотографируйте целый лист с черешком на однотонном фоне, пожалуйста.'
-                cv2.imshow('Image', img)
+                print 'Error 2'
+                #cv2.imshow('Image', img)
         
             else:        
                 #Вычисление диагонали прямоугольного контура объекта
@@ -160,31 +157,33 @@ if images != []:
      
                 if len(contours) > 1:
                         result=4
-                        print 'Ошибка. Сфотографируйте один лист на нейтральном фоне, пожалуйста.'
-                        cv2.imshow('Image', img)
+                        print 'Error 3'
+                        #cv2.imshow('Image', img)
                 else:
                     if len(contours) == 1:
                         cnt = contours[0]
                         x,y,w,h = cv2.boundingRect(cnt)
                         area = cv2.contourArea(cnt)
                         if x <= 1 or y <=1:
-                            cv2.imshow('Image', img)
+                            #cv2.imshow('Image', img)
                             result=3
-                            print result
-                            print 'Ошибка. Лист выходит за края изображения, сфотографируйте его полностью, пожалуйста.'
+                            #print result
+                            print 'Error 4'
                         elif x+w-5 >= img.shape[1] or y+h-5 >= img.shape[0]:
-                            cv2.imshow('Image', img)
+                            #cv2.imshow('Image', img)
                             result=6
-                            print result
-                            print 'Ошибка. Лист выходит за края изображения, сфотографируйте его полностью, пожалуйста.'
+                            #print 'ok', result
+                            print 'Error 5'
                         elif area < min_size:
-                            cv2.imshow('Image', img)
+                            #cv2.imshow('Image', img)
                             result=5
-                            print 'Ошибка. Сфотографируйте лист на контрастном фоне, пожалуйста.'
-            
+                            print 'Error 6'
+        
+                            
         if result == 0:
             from scipy import stats
             from skimage.measure import regionprops
+
             cv2.drawContours(edgedImage,contours,-1,(255,255,255),1)
 
             ##### Eccentricity #####
@@ -285,17 +284,26 @@ if images != []:
             #length ratio
             f10 = len(newdist)/max(newdist)
             #plt.plot(dist)
-    
+            
     
             #Display images.
             #cv2.imshow('Image', img)
             #cv2.imshow('Leaf contour', edgedImage)
             #print 'Done!'
-            imgMatrix[images.index(sourceImage)+1][1:propNum] = matrixLine
-            #cv2.waitKey(0)
+            toWrite.append(matrixLine)
 
-for i in range(imNum+1):
-    print imgMatrix[i]   
+
+imNum = len(toWrite)
+imgMatrix = [[0 for x in range(propNum)] for y in range(imNum+1)]
+imgMatrix[0] = head
+for i in range(1,imNum+1):
+    imgMatrix[i][0] = 'treeType'
+
+for i in range(imNum):
+    imgMatrix[i+1][1:propNum] = toWrite[i]
+
+for k in range(imNum+1):
+    print imgMatrix[k] 
 
 with open('leaves.csv', 'wb') as f:
     writer = csv.writer(f)
