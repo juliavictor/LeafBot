@@ -1,3 +1,3 @@
 # LeafBot
 
-vienmoir/Botanicum for a final version of this project
+See github.com/vienmoir/Botanicum for a final version of this project
